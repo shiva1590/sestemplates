@@ -1,0 +1,50 @@
+name: Get All SES Templates and Create PR with HTML (Secure API Key)
+
+# Define environment variables for credentials (securely stored in GitHub secrets)
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}  # Optional, if not specified in Boto3 configuration
+
+# Define the workflow step
+run: |
+  # Install required libraries
+  pip install boto3
+
+  import boto3
+  # Create Boto3 session using environment variables
+  session = boto3.Session(
+      aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+      aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+      region_name=os.environ.get('AWS_REGION')  # Optional
+  )
+
+  # Create SES client
+  client = session.client('ses')
+
+  # Get a list of all templates
+  templates = client.list_templates()['Templates']
+
+  # Loop through each template name
+  for template in templates:
+    template_name = template['Name']
+    # Get template content from SES
+    response = client.get_template(TemplateName=template_name)
+    template_html = response['Template']['Html']
+
+    # Save template to file using a descriptive filename
+    with open(f"{template_name}.html", "w") as f:
+        f.write(template_html)
+
+    # Check for changes and add to PR if needed
+    if git diff --unified=0 f"{template_name}.html"; then
+      echo "Template '$template_name' unchanged. Skipping update."
+    else
+      echo "Changes detected in '$template_name'. Adding to PR."
+      git add f"{template_name}.html"
+    fi
+
+  # Commit changes, push to repository, and create Pull Request
+  git commit -m "Update all SES templates from API"
+  git push origin main
+  gh pr create
