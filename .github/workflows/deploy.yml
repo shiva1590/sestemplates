@@ -6,6 +6,9 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ${{ secrets.AWS_REGION }}  # Optional, if not specified in Boto3 configuration
 
+on:
+  workflow_dispatch:
+
 # Define the workflow step
 run: |
   # Install required libraries
