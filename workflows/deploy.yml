@@ -1,0 +1,32 @@
+ame: Get All SES Templates and Create PR with HTML
+
+# Define script to list and retrieve templates
+run: |
+  # Install required libraries
+  pip install boto3
+
+  # Get a list of all templates
+  templates=$(aws ses list-templates | jq -r '.Templates[].Name')
+
+  # Loop through each template name
+  for template_name in $templates; do
+    # Get template content from SES
+    aws ses get-template --template-name $template_name | jq -r '.Template.Html' > "$template_name.html"
+
+    # Check if existing file differs
+    if git diff --unified=0 "$template_name.html"; then
+      echo "Template '$template_name' unchanged. Skipping update."
+    else
+      echo "Changes detected in '$template_name'. Adding to PR."
+      git add "$template_name.html"
+    fi
+  done
+
+# Create and push Pull Request
+run: |
+  git commit -m "Update all SES templates"
+  git push origin main
+
+# Open Pull Request in browser (optional)
+run: |
+  gh pr create
