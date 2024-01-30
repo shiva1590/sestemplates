@@ -21,5 +21,5 @@ jobs:
         run: pip install boto3
 
       - name: Fetch SES templates and create PR
-        run:  python create_pr_from_dit_ses.py
+        run:  python workflows/create_pr_from_dit_ses.py
           
