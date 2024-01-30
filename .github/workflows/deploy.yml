@@ -21,7 +21,7 @@ jobs:
         run: pip install boto3
 
       - name: Fetch SES templates and create PR
-        run: 
+        run:  |
               import os
               import boto3
               import subprocess
