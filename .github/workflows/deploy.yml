@@ -22,6 +22,7 @@ jobs:
 
       - name: Fetch SES templates and create PR
         run:  |
+              python - <<EOF
               import os
               import boto3
               import subprocess
@@ -64,4 +65,5 @@ jobs:
               subprocess.run("git commit -m 'Update all SES templates from API'", shell=True)
               subprocess.run("git push origin main", shell=True)
               subprocess.run("gh pr create", shell=True)
+              EOF
           
