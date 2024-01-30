@@ -40,6 +40,20 @@ for template in templates:
             subprocess.run(add_command, shell=True)
 
 # Commit changes, push to repository, and create Pull Request
-subprocess.run("git commit -m 'Update all SES templates from API'", shell=True)
-subprocess.run("git push origin main", shell=True)
+commit_command = "git commit -m 'Update all SES templates from API'"
+commit_process = subprocess.run(commit_command, shell=True, capture_output=True, text=True)
+if commit_process.returncode != 0:
+    print("Error committing changes:")
+    print(commit_process.stderr)
+else:
+    print("Changes committed successfully.")
+
+# Push changes
+push_command = "git push origin main"
+push_process = subprocess.run(push_command, shell=True, capture_output=True, text=True)
+if push_process.returncode != 0:
+    print("Error pushing changes:")
+    print(push_process.stderr)
+else:
+    print("Changes pushed successfully.")
 subprocess.run("gh pr create", shell=True)
